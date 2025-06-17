@@ -1,0 +1,12 @@
+requests
+websockets
+PySide6
+pdfplumber
+python-docx
+pytesseract
+pillow
+pandas
+SpeechRecognition
+pyaudio
+sounddevice
+soundfile
