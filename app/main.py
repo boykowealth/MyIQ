@@ -1,4 +1,3 @@
-# app/main.py
 import sys
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QTextEdit, QPushButton,
@@ -38,11 +37,9 @@ class ChatBubble(QWidget):
 
         rect = self.rect().adjusted(self.margin, self.margin, -self.margin, -self.margin)
 
-        # Bubble color
-        bubble_color = QColor("#DCF8C6") if self.is_user else QColor("#FFFFFF")
-        border_color = QColor("#34B7F1") if self.is_user else QColor("#DDD")
+        bubble_color = QColor("#105384") if self.is_user else QColor("#ffffff")
+        border_color = QColor("#08324f") if self.is_user else QColor("#bbb")
 
-        # Align bubble
         if self.is_user:
             rect.moveLeft(self.width() - rect.width() - self.margin)
 
@@ -50,9 +47,8 @@ class ChatBubble(QWidget):
         painter.setPen(border_color)
         painter.drawRoundedRect(rect, 10, 10)
 
-        # Draw text
         text_rect = rect.adjusted(self.padding, self.padding, -self.padding, -self.padding)
-        painter.setPen(Qt.black)
+        painter.setPen(Qt.white if self.is_user else Qt.black)
         painter.drawText(text_rect, Qt.TextWordWrap, self.text)
 
 
@@ -65,13 +61,11 @@ class ChatItemWidget(QWidget):
         layout.setContentsMargins(10, 5, 10, 5)
         layout.setSpacing(2)
 
-        # Header: icon + name
         header = QWidget()
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(0, 0, 0, 0)
         header_layout.setSpacing(5)
 
-        # Icon
         icon_label = QLabel()
         icon_size = 24
         icon_label.setFixedSize(icon_size, icon_size)
@@ -80,15 +74,14 @@ class ChatItemWidget(QWidget):
             icon = QIcon("icons/user_icon.png")
             name = "You"
         else:
-            icon = QIcon("icons/ai_icon.png")
+            icon = QIcon("icons/MyIQICon.png")
             name = "MyIQ"
 
         pixmap = icon.pixmap(icon_size, icon_size)
         icon_label.setPixmap(pixmap)
 
-        # Name label
         name_label = QLabel(name)
-        name_label.setStyleSheet("font-weight: bold; color: #555;")
+        name_label.setStyleSheet("font-weight: bold; color: #105384;")
 
         header_layout.addWidget(icon_label)
         header_layout.addWidget(name_label)
@@ -96,7 +89,6 @@ class ChatItemWidget(QWidget):
 
         layout.addWidget(header)
 
-        # Bubble widget
         self.bubble = ChatBubble(text, is_user)
         layout.addWidget(self.bubble)
 
@@ -119,15 +111,15 @@ class MyIQWindow(QMainWindow):
         self.setWindowTitle("MyIQ")
         self.resize(800, 600)
 
-        self.attachments = []  # store (filepath, content) tuples
+        self.attachments = []
 
         self.chat_area = QListWidget()
-        self.chat_area.setStyleSheet("background-color: #F5F5F5; border: none;")
+        self.chat_area.setStyleSheet("background-color: #ddd5c2; border: none;")
         self.chat_area.setSpacing(10)
         self.chat_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         self.upload_button = QPushButton()
-        self.upload_button.setIcon(QIcon("icons/paperclip.png"))  # Make sure this file exists
+        self.upload_button.setIcon(QIcon("icons/paperclip.png"))
         self.upload_button.setFixedSize(32, 32)
         self.upload_button.setToolTip("Upload File")
         self.upload_button.setStyleSheet("border:none;")
@@ -167,19 +159,19 @@ class MyIQWindow(QMainWindow):
     def bubbly_style(self):
         return """
         QMainWindow {
-            background-color: #fdfcfb;
+            background-color: #ddd5c2;
         }
 
         QLabel {
             font-size: 18px;
             font-weight: bold;
-            color: #444;
+            color: #105384;
             padding: 6px;
         }
 
         QTextEdit {
             background-color: #ffffff;
-            border: 2px solid #ddd;
+            border: 2px solid #105384;
             border-radius: 12px;
             padding: 10px;
             font-size: 14px;
@@ -187,19 +179,19 @@ class MyIQWindow(QMainWindow):
         }
 
         QPushButton {
-            background-color: #e6e6e6;
+            background-color: #105384;
             border-radius: 14px;
             padding: 8px 18px;
             font-size: 14px;
-            color: #333;
+            color: white;
         }
 
         QPushButton:hover {
-            background-color: #d0d0d0;
+            background-color: #0d456d;
         }
 
         QPushButton:pressed {
-            background-color: #bbbbbb;
+            background-color: #08324f;
         }
         """
 
@@ -208,7 +200,7 @@ class MyIQWindow(QMainWindow):
             if event.type() == QEvent.KeyPress:
                 if event.key() in (Qt.Key_Return, Qt.Key_Enter):
                     if event.modifiers() == Qt.ShiftModifier:
-                        return False  # allow newline
+                        return False
                     else:
                         self.send_message()
                         return True
@@ -218,7 +210,6 @@ class MyIQWindow(QMainWindow):
         widget = ChatItemWidget(text, is_user)
         item = QListWidgetItem()
         item.setSizeHint(widget.sizeHint())
-
         self.chat_area.addItem(item)
         self.chat_area.setItemWidget(item, widget)
         self.chat_area.scrollToBottom()
@@ -233,9 +224,7 @@ class MyIQWindow(QMainWindow):
             attach_text = "\n".join(f"📎 {path}" for path, _ in self.attachments)
             user_message += "\n" + attach_text
 
-        # Show user message immediately
         self.add_chat_bubble(user_message, is_user=True)
-
         self.input_box.clear()
         self.attachments.clear()
 
@@ -244,7 +233,6 @@ class MyIQWindow(QMainWindow):
             for _, content in self.attachments:
                 prompt += f"\n\nAttached Content:\n{content}"
 
-        # Call LLM in separate thread
         self.thread = LLMThread(prompt)
         self.thread.response_ready.connect(self.on_llm_response)
         self.thread.start()
@@ -257,7 +245,6 @@ class MyIQWindow(QMainWindow):
         if file_path:
             content = parse_file(file_path)
             self.attachments.append((file_path, content))
-            # Could update UI here to show attachments if desired
 
 
 if __name__ == "__main__":
