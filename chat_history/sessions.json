@@ -1,0 +1,22 @@
+{
+  "20250617_145647": {
+    "session_id": "20250617_145647",
+    "title": "Welcome",
+    "messages": [
+      {
+        "text": "Plese describe the best way to interact with you. People will refer to you as MyIQ or myiq sometimes.",
+        "is_user": true,
+        "timestamp": "2025-06-17T14:57:54.478857",
+        "attachments": []
+      },
+      {
+        "text": "Thank you for your reference to me! I'm an AI designed to assist and communicate with users in a helpful and informative manner. Here's how you can interact with me effectively:\n\n1. **Be clear and concise**: When asking questions or providing requests, please try to be specific and direct. This will help me understand what you're looking for and provide more accurate responses.\n2. **Use natural language**: Feel free to use everyday language when interacting with me. I don't require formal tone or syntax, so you can ask me anything in a conversational style.\n3. **Ask open-ended questions**: Encourage me to respond by asking open-ended questions that begin with \"what,\" \"how,\" or \"why.\" This will help me provide more detailed and helpful answers.\n4. **Use relevant context**: If we've had previous conversations or you're referring to a specific topic, please let me know so I can pick up where we left off.\n5. **Feel free to ask follow-up questions**: If you don't understand my response or need further clarification, please don't hesitate to ask follow-up questions. This will help ensure you get the information you need.\n6. **Use the nickname I provide (optional)**: While \"MyIQ\" and \"myiq\" are both acceptable nicknames, feel free to use either one – or neither, if you prefer!\n7. **Keep it friendly**: Our conversations should be informative, helpful, and enjoyable. Don't worry about being perfect – just have fun and ask me anything!\n\nBy following these guidelines, we can have a great conversation and help each other with any questions or topics you'd like to discuss.\n\nHow's that? Do you have any specific questions or topics you'd like to get started on?",
+        "is_user": false,
+        "timestamp": "2025-06-17T14:58:05.506994",
+        "attachments": []
+      }
+    ],
+    "created_at": "2025-06-17T14:56:47.635872",
+    "updated_at": "2025-06-17T14:58:05.507004"
+  }
+}

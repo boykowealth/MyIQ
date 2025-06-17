@@ -10,3 +10,4 @@ SpeechRecognition
 pyaudio
 sounddevice
 soundfile
+PyAudio

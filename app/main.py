@@ -1,254 +1,121 @@
 import sys
 from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QTextEdit, QPushButton,
-    QFileDialog, QVBoxLayout, QWidget, QLabel, QHBoxLayout,
-    QListWidget, QListWidgetItem, QSizePolicy
+    QApplication, QMainWindow, QWidget,
+    QVBoxLayout, QHBoxLayout, QPushButton,
+    QStackedWidget, QFrame, QToolButton, QLabel
 )
-from PySide6.QtCore import Qt, QEvent, QThread, Signal, QSize
-from PySide6.QtGui import QIcon, QPainter, QColor, QFontMetrics
-from chat_handler import get_llm_response
-from file_parser import parse_file
-from voice_trigger import start_voice_listener
+from PySide6.QtGui import QIcon
+from PySide6.QtCore import Qt
+
+from chat_app import MyIQWindow
+# from widgets.calendar_widget import CalendarWidget
+# from widgets.notes_widget import NotesWidget
+# from widgets.mindmap_widget import MindMapWidget
 
 
-class ChatBubble(QWidget):
-    def __init__(self, text, is_user=False):
-        super().__init__()
-        self.text = text
-        self.is_user = is_user
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.margin = 15
-        self.padding = 10
-        self.max_width = 400
-        self.setMinimumHeight(20)
-        self.setContentsMargins(0, 0, 0, 0)
-
-        fm = QFontMetrics(self.font())
-        rect = fm.boundingRect(0, 0, self.max_width, 1000, Qt.TextWordWrap, self.text)
-        self.text_rect = rect.adjusted(-self.padding, -self.padding, self.padding, self.padding)
-        self.setMinimumHeight(self.text_rect.height() + self.margin)
-
-    def sizeHint(self):
-        return QSize(self.text_rect.width() + self.margin * 2, self.text_rect.height() + self.margin * 2)
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-
-        rect = self.rect().adjusted(self.margin, self.margin, -self.margin, -self.margin)
-
-        bubble_color = QColor("#105384") if self.is_user else QColor("#ffffff")
-        border_color = QColor("#08324f") if self.is_user else QColor("#bbb")
-
-        if self.is_user:
-            rect.moveLeft(self.width() - rect.width() - self.margin)
-
-        painter.setBrush(bubble_color)
-        painter.setPen(border_color)
-        painter.drawRoundedRect(rect, 10, 10)
-
-        text_rect = rect.adjusted(self.padding, self.padding, -self.padding, -self.padding)
-        painter.setPen(Qt.white if self.is_user else Qt.black)
-        painter.drawText(text_rect, Qt.TextWordWrap, self.text)
-
-
-class ChatItemWidget(QWidget):
-    def __init__(self, text, is_user=False):
-        super().__init__()
-        self.is_user = is_user
-
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(10, 5, 10, 5)
-        layout.setSpacing(2)
-
-        header = QWidget()
-        header_layout = QHBoxLayout(header)
-        header_layout.setContentsMargins(0, 0, 0, 0)
-        header_layout.setSpacing(5)
-
-        icon_label = QLabel()
-        icon_size = 24
-        icon_label.setFixedSize(icon_size, icon_size)
-
-        if is_user:
-            icon = QIcon("icons/user_icon.png")
-            name = "You"
-        else:
-            icon = QIcon("icons/MyIQICon.png")
-            name = "MyIQ"
-
-        pixmap = icon.pixmap(icon_size, icon_size)
-        icon_label.setPixmap(pixmap)
-
-        name_label = QLabel(name)
-        name_label.setStyleSheet("font-weight: bold; color: #105384;")
-
-        header_layout.addWidget(icon_label)
-        header_layout.addWidget(name_label)
-        header_layout.addStretch()
-
-        layout.addWidget(header)
-
-        self.bubble = ChatBubble(text, is_user)
-        layout.addWidget(self.bubble)
-
-
-class LLMThread(QThread):
-    response_ready = Signal(str)
-
-    def __init__(self, prompt):
-        super().__init__()
-        self.prompt = prompt
-
-    def run(self):
-        response = get_llm_response(self.prompt)
-        self.response_ready.emit(response)
-
-
-class MyIQWindow(QMainWindow):
+class MainApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("MyIQ")
-        self.resize(800, 600)
+        self.setMinimumSize(1100, 700)
 
-        self.attachments = []
+        # Main container
+        main_widget = QWidget()
+        main_layout = QVBoxLayout(main_widget)
+        main_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.chat_area = QListWidget()
-        self.chat_area.setStyleSheet("background-color: #ddd5c2; border: none;")
-        self.chat_area.setSpacing(10)
-        self.chat_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # Top bar with hamburger
+        top_bar = QHBoxLayout()
+        self.hamburger_btn = QToolButton()
+        self.hamburger_btn.setText("☰")
+        self.hamburger_btn.setStyleSheet("font-size: 22px; border: none;")
+        self.hamburger_btn.clicked.connect(self.toggle_sidebar)
+        top_bar.addWidget(self.hamburger_btn)
+        top_bar.addStretch()
 
-        self.upload_button = QPushButton()
-        self.upload_button.setIcon(QIcon("icons/paperclip.png"))
-        self.upload_button.setFixedSize(32, 32)
-        self.upload_button.setToolTip("Upload File")
-        self.upload_button.setStyleSheet("border:none;")
+        # Content area
+        content_layout = QHBoxLayout()
+        content_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.input_box = QTextEdit()
-        self.input_box.setFixedHeight(45)
-        self.input_box.setAcceptRichText(False)
-        self.input_box.installEventFilter(self)
+        # Sidebar
+        self.sidebar = QFrame()
+        self.sidebar.setMinimumWidth(220)
+        self.sidebar.setStyleSheet("background-color: #F7F7F8;")
+        self.sidebar_layout = QVBoxLayout(self.sidebar)
+        self.sidebar_layout.setSpacing(10)
+        self.sidebar_layout.setContentsMargins(10, 20, 10, 10)
 
-        self.send_button = QPushButton("Send")
-
-        input_layout = QHBoxLayout()
-        input_layout.addWidget(self.upload_button)
-        input_layout.addWidget(self.input_box)
-        input_layout.addWidget(self.send_button)
-
-        layout = QVBoxLayout()
-        layout.addWidget(QLabel("MyIQ Chat"))
-        layout.addWidget(self.chat_area)
-        layout.addLayout(input_layout)
-
-        button_layout = QHBoxLayout()
-        self.voice_button = QPushButton("🎙️ Voice On")
-        button_layout.addWidget(self.voice_button)
-        layout.addLayout(button_layout)
-
-        container = QWidget()
-        container.setLayout(layout)
-        self.setCentralWidget(container)
-
-        self.send_button.clicked.connect(self.send_message)
-        self.upload_button.clicked.connect(self.upload_file)
-        self.voice_button.clicked.connect(start_voice_listener)
-
-        self.setStyleSheet(self.bubbly_style())
-
-    def bubbly_style(self):
-        return """
-        QMainWindow {
-            background-color: #ddd5c2;
-        }
-
-        QLabel {
-            font-size: 18px;
-            font-weight: bold;
-            color: #105384;
-            padding: 6px;
-        }
-
-        QTextEdit {
-            background-color: #ffffff;
-            border: 2px solid #105384;
-            border-radius: 12px;
-            padding: 10px;
-            font-size: 14px;
-            color: #333;
-        }
-
-        QPushButton {
-            background-color: #105384;
-            border-radius: 14px;
-            padding: 8px 18px;
-            font-size: 14px;
-            color: white;
-        }
-
-        QPushButton:hover {
-            background-color: #0d456d;
-        }
-
-        QPushButton:pressed {
-            background-color: #08324f;
-        }
+        # Navigation buttons
+        button_style = """
+            QPushButton {
+                background-color: transparent;
+                border: none;
+                text-align: left;
+                padding: 10px 15px;
+                font-size: 16px;
+                color: #333;
+            }
+            QPushButton:hover {
+                background-color: #eaeaea;
+            }
+            QPushButton:checked {
+                background-color: #dcdcdc;
+                font-weight: bold;
+            }
         """
 
-    def eventFilter(self, obj, event):
-        if obj == self.input_box:
-            if event.type() == QEvent.KeyPress:
-                if event.key() in (Qt.Key_Return, Qt.Key_Enter):
-                    if event.modifiers() == Qt.ShiftModifier:
-                        return False
-                    else:
-                        self.send_message()
-                        return True
-        return super().eventFilter(obj, event)
+        self.chat_btn = QPushButton("🧠  Intelligence")
+        self.cal_btn = QPushButton("📆  Timeline")
+        self.notes_btn = QPushButton("📝  Notebook")
+        self.map_btn = QPushButton("🧭  MapView")
 
-    def add_chat_bubble(self, text, is_user=False):
-        widget = ChatItemWidget(text, is_user)
-        item = QListWidgetItem()
-        item.setSizeHint(widget.sizeHint())
-        self.chat_area.addItem(item)
-        self.chat_area.setItemWidget(item, widget)
-        self.chat_area.scrollToBottom()
+        for btn in [self.chat_btn, self.cal_btn, self.notes_btn, self.map_btn]:
+            btn.setCheckable(True)
+            btn.setStyleSheet(button_style)
+            self.sidebar_layout.addWidget(btn)
 
-    def send_message(self):
-        user_input = self.input_box.toPlainText().strip()
-        if not user_input and not self.attachments:
-            return
+        self.sidebar_layout.addStretch()
 
-        user_message = user_input
-        if self.attachments:
-            attach_text = "\n".join(f"📎 {path}" for path, _ in self.attachments)
-            user_message += "\n" + attach_text
+        # Stacked widget
+        self.stack = QStackedWidget()
+        self.chat_widget = MyIQWindow()
+        # self.calendar_widget = CalendarWidget()
+        # self.notes_widget = NotesWidget()
+        # self.mindmap_widget = MindMapWidget()
 
-        self.add_chat_bubble(user_message, is_user=True)
-        self.input_box.clear()
-        self.attachments.clear()
+        self.stack.addWidget(self.chat_widget)
+        # self.stack.addWidget(self.calendar_widget)
+        # self.stack.addWidget(self.notes_widget)
+        # self.stack.addWidget(self.mindmap_widget)
 
-        prompt = user_input
-        if self.attachments:
-            for _, content in self.attachments:
-                prompt += f"\n\nAttached Content:\n{content}"
+        self.chat_btn.clicked.connect(lambda: self.switch_app(0))
+        self.cal_btn.clicked.connect(lambda: self.switch_app(1))
+        self.notes_btn.clicked.connect(lambda: self.switch_app(2))
+        self.map_btn.clicked.connect(lambda: self.switch_app(3))
 
-        self.thread = LLMThread(prompt)
-        self.thread.response_ready.connect(self.on_llm_response)
-        self.thread.start()
+        self.chat_btn.setChecked(True)
+        self.switch_app(0)
 
-    def on_llm_response(self, response):
-        self.add_chat_bubble(response, is_user=False)
+        # Add sidebar and stack to content
+        content_layout.addWidget(self.sidebar)
+        content_layout.addWidget(self.stack, 1)
 
-    def upload_file(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, "Open File")
-        if file_path:
-            content = parse_file(file_path)
-            self.attachments.append((file_path, content))
+        main_layout.addLayout(top_bar)
+        main_layout.addLayout(content_layout)
+        self.setCentralWidget(main_widget)
+
+    def toggle_sidebar(self):
+        self.sidebar.setVisible(not self.sidebar.isVisible())
+
+    def switch_app(self, index):
+        self.stack.setCurrentIndex(index)
+        for btn in [self.chat_btn, self.cal_btn, self.notes_btn, self.map_btn]:
+            btn.setChecked(False)
+        [self.chat_btn, self.cal_btn, self.notes_btn, self.map_btn][index].setChecked(True)
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = MyIQWindow()
+    window = MainApp()
     window.show()
     sys.exit(app.exec())
