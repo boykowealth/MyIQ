@@ -9,7 +9,7 @@ from PySide6.QtCore import Qt
 
 from chat_app import MyIQWindow
 # from widgets.calendar_widget import CalendarWidget
-# from widgets.notes_widget import NotesWidget
+from notebook import NotebookWidget
 # from widgets.mindmap_widget import MindMapWidget
 
 
@@ -80,12 +80,12 @@ class MainApp(QMainWindow):
         self.stack = QStackedWidget()
         self.chat_widget = MyIQWindow()
         # self.calendar_widget = CalendarWidget()
-        # self.notes_widget = NotesWidget()
+        self.notes_widget = NotebookWidget()
         # self.mindmap_widget = MindMapWidget()
 
         self.stack.addWidget(self.chat_widget)
         # self.stack.addWidget(self.calendar_widget)
-        # self.stack.addWidget(self.notes_widget)
+        self.stack.addWidget(self.notes_widget)
         # self.stack.addWidget(self.mindmap_widget)
 
         self.chat_btn.clicked.connect(lambda: self.switch_app(0))

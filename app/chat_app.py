@@ -1,4 +1,4 @@
-# main.py
+# chat_app.py
 import sys
 import json
 import os
