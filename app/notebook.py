@@ -10,6 +10,8 @@ from datetime import datetime
 import os
 import json
 
+from style import light_mode
+
 class NotebookSession:
     def __init__(self, session_id=None, title="Untitled", content=""):
         self.session_id = session_id or datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -66,6 +68,7 @@ class NotebookWidget(QWidget):
         super().__init__()
         self.manager = NotebookManager()
         self.current_session = None
+        self.setStyleSheet(self.light_mode_style())
 
         layout = QHBoxLayout(self)
         self.list = QListWidget()
@@ -122,6 +125,9 @@ class NotebookWidget(QWidget):
 
         self.load_sessions()
         self.setup_connections()
+
+    def light_mode_style(self):
+        return light_mode(self)
 
     def setup_connections(self):
         self.new_btn.clicked.connect(self.create_new)

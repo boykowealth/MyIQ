@@ -8,7 +8,7 @@ from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt
 
 from chat_app import MyIQWindow
-# from widgets.calendar_widget import CalendarWidget
+from calendar_app import CalendarApp
 from notebook import NotebookWidget
 # from widgets.mindmap_widget import MindMapWidget
 
@@ -62,9 +62,8 @@ class MainApp(QMainWindow):
         self.chat_btn = QPushButton("🧠  Intelligence")
         self.cal_btn = QPushButton("📆  Timeline")
         self.notes_btn = QPushButton("📝  Notebook")
-        self.map_btn = QPushButton("🧭  MapView")
 
-        for btn in [self.chat_btn, self.cal_btn, self.notes_btn, self.map_btn]:
+        for btn in [self.chat_btn, self.cal_btn, self.notes_btn]:
             btn.setCheckable(True)
             btn.setStyleSheet(button_style)
             self.sidebar_layout.addWidget(btn)
@@ -73,23 +72,19 @@ class MainApp(QMainWindow):
 
         self.stack = QStackedWidget()
         self.chat_widget = MyIQWindow()
-        # self.calendar_widget = CalendarWidget()
+        self.calendar_widget = CalendarApp()
         self.notes_widget = NotebookWidget()
-        # self.mindmap_widget = MindMapWidget()
 
         self.stack.addWidget(self.chat_widget)
-        # self.stack.addWidget(self.calendar_widget)
+        self.stack.addWidget(self.calendar_widget)
         self.stack.addWidget(self.notes_widget)
-        # self.stack.addWidget(self.mindmap_widget)
 
         self.chat_btn.clicked.connect(lambda: self.switch_app(0))
         self.cal_btn.clicked.connect(lambda: self.switch_app(1))
         self.notes_btn.clicked.connect(lambda: self.switch_app(2))
-        self.map_btn.clicked.connect(lambda: self.switch_app(3))
 
         self.chat_btn.setChecked(True)
         self.switch_app(0)
-
 
         content_layout.addWidget(self.sidebar)
         content_layout.addWidget(self.stack, 1)
@@ -103,9 +98,9 @@ class MainApp(QMainWindow):
 
     def switch_app(self, index):
         self.stack.setCurrentIndex(index)
-        for btn in [self.chat_btn, self.cal_btn, self.notes_btn, self.map_btn]:
+        for btn in [self.chat_btn, self.cal_btn, self.notes_btn]:
             btn.setChecked(False)
-        [self.chat_btn, self.cal_btn, self.notes_btn, self.map_btn][index].setChecked(True)
+        [self.chat_btn, self.cal_btn, self.notes_btn][index].setChecked(True)
 
 
 if __name__ == "__main__":

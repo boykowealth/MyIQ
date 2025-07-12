@@ -16,6 +16,8 @@ from chat_handler import get_llm_response
 from file_parser import parse_file
 from voice_trigger import start_voice_listener
 
+from style import light_mode
+
 
 class ChatSession:
     def __init__(self, session_id=None, title="New Chat"):
@@ -318,63 +320,7 @@ class MyIQWindow(QMainWindow):
         self.session_list.customContextMenuRequested.connect(self.show_context_menu)
 
     def light_mode_style(self):
-        return """
-        QMainWindow {
-            background-color: #F7F7F8;
-        }
-
-        QLabel {
-            font-size: 14px;
-            color: #202123;
-            padding: 6px;
-        }
-
-        QTextEdit {
-            background-color: #FFFFFF;
-            border: 2px solid #DADCE0;
-            border-radius: 12px;
-            padding: 10px;
-            font-size: 14px;
-            color: #202123;
-        }
-
-        QPushButton {
-            background-color: #105384;
-            border-radius: 14px;
-            padding: 8px 18px;
-            font-size: 14px;
-            color: #FFFFFF;
-        }
-
-        QPushButton:hover {
-            background-color: #13b28f;
-        }
-
-        QPushButton:pressed {
-            background-color: #0e8f6c;
-        }
-
-        QListWidget {
-            background-color: #F7F7F8;
-            border: none;
-        }
-        
-        QTreeWidget {
-            background-color: #FFFFFF;
-            border: 1px solid #DADCE0;
-            border-radius: 8px;
-        }
-        
-        QTreeWidget::item {
-            padding: 8px;
-            border-bottom: 1px solid #F0F0F0;
-        }
-        
-        QTreeWidget::item:selected {
-            background-color: #E6F0FF;
-            color: #105384;
-        }
-        """
+        return light_mode(self)
 
     def eventFilter(self, obj, event):
         if obj == self.input_box and event.type() == QEvent.KeyPress:
