@@ -19,12 +19,10 @@ class MainApp(QMainWindow):
         self.setWindowTitle("MyIQ")
         self.setMinimumSize(1100, 700)
 
-        # Main container
         main_widget = QWidget()
         main_layout = QVBoxLayout(main_widget)
         main_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Top bar with hamburger
         top_bar = QHBoxLayout()
         self.hamburger_btn = QToolButton()
         self.hamburger_btn.setText("☰")
@@ -33,11 +31,9 @@ class MainApp(QMainWindow):
         top_bar.addWidget(self.hamburger_btn)
         top_bar.addStretch()
 
-        # Content area
         content_layout = QHBoxLayout()
         content_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Sidebar
         self.sidebar = QFrame()
         self.sidebar.setMinimumWidth(220)
         self.sidebar.setStyleSheet("background-color: #F7F7F8;")
@@ -45,7 +41,6 @@ class MainApp(QMainWindow):
         self.sidebar_layout.setSpacing(10)
         self.sidebar_layout.setContentsMargins(10, 20, 10, 10)
 
-        # Navigation buttons
         button_style = """
             QPushButton {
                 background-color: transparent;
@@ -76,7 +71,6 @@ class MainApp(QMainWindow):
 
         self.sidebar_layout.addStretch()
 
-        # Stacked widget
         self.stack = QStackedWidget()
         self.chat_widget = MyIQWindow()
         # self.calendar_widget = CalendarWidget()
@@ -96,7 +90,7 @@ class MainApp(QMainWindow):
         self.chat_btn.setChecked(True)
         self.switch_app(0)
 
-        # Add sidebar and stack to content
+
         content_layout.addWidget(self.sidebar)
         content_layout.addWidget(self.stack, 1)
 

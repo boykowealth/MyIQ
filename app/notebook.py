@@ -32,7 +32,7 @@ class NotebookSession:
         session.created_at = datetime.fromisoformat(data['created_at'])
         session.updated_at = datetime.fromisoformat(data['updated_at'])
         return session
-    
+
 class NotebookManager:
     def __init__(self, data_dir="notebook_data"):
         self.data_dir = data_dir
@@ -60,7 +60,6 @@ class NotebookManager:
         if os.path.exists(path):
             os.remove(path)
 
-
 class NotebookWidget(QWidget):
     def __init__(self):
         super().__init__()
@@ -73,6 +72,7 @@ class NotebookWidget(QWidget):
         self.editor = QTextEdit()
         self.viewer = QWebEngineView()
 
+        # Buttons
         button_bar = QHBoxLayout()
         self.new_btn = QPushButton("New")
         self.save_btn = QPushButton("Save")
@@ -86,16 +86,35 @@ class NotebookWidget(QWidget):
         button_bar.addStretch()
         button_bar.addWidget(self.render_btn)
 
-        editor_side = QVBoxLayout()
-        editor_side.addWidget(QLabel("✏️ Notebook Editor"))
-        editor_side.addWidget(self.editor)
-        editor_side.addLayout(button_bar)
-        editor_side.addWidget(QLabel("🔍 Rendered View"))
-        editor_side.addWidget(self.viewer)
+        # Editor and Viewer side by side
+        splitter = QSplitter(Qt.Horizontal)
 
+        # Editor panel
+        editor_panel = QWidget()
+        editor_layout = QVBoxLayout()
+        editor_layout.addWidget(QLabel("✏️ Notebook Editor"))
+        editor_layout.addWidget(self.editor)
+        editor_panel.setLayout(editor_layout)
+
+        # Viewer panel
+        viewer_panel = QWidget()
+        viewer_layout = QVBoxLayout()
+        viewer_layout.addWidget(QLabel("🔍 Rendered View"))
+        viewer_layout.addWidget(self.viewer)
+        viewer_panel.setLayout(viewer_layout)
+
+        splitter.addWidget(editor_panel)
+        splitter.addWidget(viewer_panel)
+        splitter.setSizes([2, 1])  # Editor takes more space by default
+
+        # Right panel (buttons + splitter)
         right_panel = QWidget()
-        right_panel.setLayout(editor_side)
+        right_layout = QVBoxLayout()
+        right_layout.addLayout(button_bar)
+        right_layout.addWidget(splitter)
+        right_panel.setLayout(right_layout)
 
+        # Main layout
         layout.addWidget(self.list, 1)
         layout.addWidget(right_panel, 3)
 
@@ -113,6 +132,7 @@ class NotebookWidget(QWidget):
     def create_new(self):
         self.current_session = NotebookSession()
         self.editor.clear()
+        self.viewer.setHtml("")
         self.load_sessions()
 
     def save_current(self):
@@ -152,6 +172,7 @@ class NotebookWidget(QWidget):
         session = item.data(Qt.UserRole)
         self.current_session = session
         self.editor.setPlainText(session.content)
+        self.render_content()
 
     def render_content(self):
         if not self.current_session:

@@ -1,7 +1,7 @@
 {
   "session_id": "20250628_155246",
   "title": "Welcome",
-  "content": "# Welcome To Notebook\n\n_Your Personal Smart Notebook System_",
+  "content": "# Welcome To Notebook\n\n_Your Personal Smart Notebook System_\n\nNotebook offers an HTML render system for note taking and report writing. It includes integrated LaText and standard HTML5 functionality.\n\n## LaText\n\nTo integrate LaText into your Notebook, double dollar signs ($$) must wrapped around the equation. For example:\n\n`\n$$1+1=2 $$\n`\n\n__Output:__\n\n$$\n1+1=2\n$$\n\n## HTML5\n\n",
   "created_at": "2025-06-28T15:52:46.409499",
-  "updated_at": "2025-06-28T15:53:37.898304"
+  "updated_at": "2025-07-11T21:16:07.877488"
 }
